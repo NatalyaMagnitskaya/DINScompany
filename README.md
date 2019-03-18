@@ -11,12 +11,14 @@ not in (select call_forwarding.from from call_forwarding) and call_logs.call_dir
  
 
 #Top 10: Most active users
+
 select c.uid from call_logs c 
 group by c.uid 
 order by count(c.call_id) DESC
 limit 10
 
 #with the same number of calls (with ties)
+
 select c.uid from call_logs c 
 where count(c.call_id) in 
 (select count(b.call_id) from call_logs c 
