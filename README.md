@@ -1,34 +1,112 @@
-# DINScompany
-Test task for DINS
-#Total expenses for UID(pay for minute)
+#Total cost for each UID
 
-select payer, sum(time) as total_time, sum(expenses) as need_to_pay from (
-(select call_logs.uid as payer,  CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs left join call_forwarding on call_forwarding.from=call_logs.to  where call_logs.to in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_forwarding.to not in (select phone_number from numbers) group by call_logs.uid ) union all ( select call_logs.uid as payer, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time,sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs where call_logs.to
-not in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_logs.to not in (select phone_number from numbers) group by call_logs.uid)) as tmp group by payer ;
-
-
-
- 
-
++-------+------------+-------------+
+| payer | total_time | need_to_pay |
++-------+------------+-------------+
+| 46503 |          4 |        0.16 |
+| 34262 |          2 |        0.08 |
+| 59484 |          4 |        0.16 |
+| 50869 |          2 |        0.08 |
+| 96701 |          4 |        0.16 |
+|  4468 |          3 |        0.12 |
+| 10494 |          2 |        0.08 |
+| 18729 |          4 |        0.16 |
+| 18815 |          4 |        0.16 |
+| 61893 |          3 |        0.12 |
+| 90509 |          4 |        0.16 |
+| 54533 |          1 |        0.04 |
+| 69521 |          2 |        0.08 |
+|  3017 |          3 |        0.12 |
+|  8953 |          3 |        0.12 |
+| 83463 |          4 |        0.16 |
+| 87294 |          3 |        0.12 |
+| 58646 |          2 |        0.08 |
+| 33072 |          2 |        0.08 |
+| 76835 |          2 |        0.08 |
+| 90298 |          4 |        0.16 |
+| 16020 |          3 |        0.12 |
+| 25984 |          1 |        0.04 |
+| 49856 |          4 |        0.16 |
+|  1009 |          2 |        0.08 |
+| 82652 |          3 |        0.12 |
+| 49511 |          4 |        0.16 |
+|  7538 |          2 |        0.08 |
+| 46376 |          8 |        0.32 |
+| 88231 |          2 |        0.08 |
+| 39388 |          4 |        0.16 |
+| 20847 |          3 |        0.12 |
+|   557 |          3 |        0.12 |
+|  3911 |          2 |        0.08 |
+| 93250 |          3 |        0.12 |
+| 55198 |          3 |        0.12 |
+| 70829 |          2 |        0.08 |
+| 83718 |          1 |        0.12 |
+| 98148 |          2 |        0.08 |
+| 50480 |          3 |        0.12 |
+| 33365 |          3 |        0.12 |
+| 16963 |          2 |        0.16 |
+| 38210 |          3 |        0.12 |
+| 60889 |          3 |        0.12 |
+| 98821 |          4 |        0.16 |
+| 96083 |          1 |        0.04 |
+| 10163 |          2 |        0.08 |
+| 12885 |          2 |        0.08 |
+| 96310 |          2 |        0.08 |
+| 94076 |          3 |        0.12 |
+| 54820 |          1 |        0.04 |
+| 50170 |          1 |        0.04 |
+| 56919 |          3 |        0.12 |
+| 28866 |          3 |        0.12 |
+| 63638 |          4 |        0.16 |
+| 34872 |          3 |        0.12 |
+| 77367 |          3 |        0.12 |
+|  6677 |          4 |        0.16 |
+| 92876 |          1 |        0.04 |
+| 89257 |          2 |        0.08 |
+|  9757 |          1 |        0.04 |
+| 84883 |          2 |        0.08 |
+|  4763 |          4 |        0.16 |
++-------+------------+-------------+
 #Top 10: Most active users
+#Do not consider repetitive
++-------+
+| uid   |
++-------+
+| 45492 |
+| 33998 |
+| 22719 |
+|  5168 |
+| 75919 |
+| 99616 |
+| 42354 |
+|  9142 |
+| 28866 |
+| 14797 |
++-------+
+#In this case, we take into account data with the same number of calls
++------+
+|c.uid |
++------+
+| 75919 |                 
+| 99616 |               
+| 42354 |                 
+|  9142 |                 
+| 28866 |                 
+| 14797 |                
+| 19182 |                 
+| 35905 |                
+| 29936 |                 
+| 86485 |                 
+| 24936 |                 
+| 45391 |                 
+| 66520 |                
+| 83718 |                
+| 60805 |                
+|  5168 |               
+| 45492 |                
+| 33998 |               
+| 22719 |  
++-------+
 
-select c.uid from call_logs c 
-group by c.uid 
-order by count(c.call_id) DESC
-limit 10
 
-#with the same number of calls (with ties)
-
-select c.uid from call_logs c 
-where count(c.call_id) in 
-(select count(b.call_id) from call_logs c 
-group by b.uid 
-order by count(b.call_id) DESC
-limit 10)
-group by c.uid 
-order by count(c.call_id) DESC
-
-#Top 10: Users with highest charges, and daily distribution for each of them
-
-select call_logs.uid as payer, call_logs.timestamp_start  as start, call_logs.timestamp_end as end, date(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start)) as day, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04 as expenses from call_logs left join call_forwarding on call_forwarding.from=call_logs.to  where call_logs.to in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_forwarding.to not in (select phone_number from numbers) and call_logs.uid in (select payer from ((select call_logs.uid as payer, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs left join call_forwarding on call_forwarding.from=call_logs.to  where call_logs.to in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_forwarding.to not in (select phone_number from numbers) group by call_logs.uid ) union all ( select call_logs.uid as payer, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs where call_logs.to not in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_logs.to not in (select phone_number from numbers) group by call_logs.uid)) as tmp group by payer order by sum(expenses) limit 10) union all  select call_logs.uid as payer, call_logs.timestamp_start  as start, call_logs.timestamp_end as end, date(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start)) as day, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04 as expenses from call_logs where call_logs.to not in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_logs.uid in (select payer from ((select call_logs.uid as payer, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs left join call_forwarding on call_forwarding.from=call_logs.to  where call_logs.to in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_forwarding.to not in (select phone_number from numbers) group by call_logs.uid ) union all ( select call_logs.uid as payer, CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) as time, sum(CEIL(TIME_TO_SEC(TIMEDIFF(call_logs.timestamp_end, call_logs.timestamp_start))/60) *0.04) as expenses from call_logs where call_logs.to not in (select call_forwarding.from from call_forwarding) and call_logs.call_dir='out' and call_logs.to not in (select phone_number from numbers) group by call_logs.uid)) as tmp group by payer order by sum(expenses) limit 10)
 
